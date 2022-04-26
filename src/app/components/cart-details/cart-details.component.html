@@ -43,9 +43,10 @@
 
                 </div>
               </div>
+              <div class="button-effect">
+                <button (click)="remove(tempCartItem)" class="btn btn-primary btn-sm mt-2">Remove</button>
 
-              <button (click)="remove(tempCartItem)" class="btn btn-primary btn-sm mt-2">Remove</button>
-
+              </div>
               <p class="mt-2">Sub Total: {{tempCartItem.quantity * tempCartItem.unitPrice | currency: 'GBP'}}</p>
             </td>
           </tr>
@@ -56,6 +57,10 @@
               <p>Total Quantity: {{totalQuantity}}</p>
               <p>Shipping: FREE</p>
               <p>Total Price: {{totalPrice | currency: 'GBP'}}</p>
+              <div class="button-effect">
+                <a routerLink="/checkout" class="btn btn-primary" role="button">Checkout</a>
+              </div>
+
             </td>
           </tr>
         </table>
