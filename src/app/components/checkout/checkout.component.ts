@@ -1,8 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {Country} from 'src/app/common/country';
 import {Luv2ShopFormService} from "../../services/luv2-shop-form.service";
 import {State} from "../../common/state";
+import {Luv2ShopValidators} from 'src/app/validators/luv2-shop-validators';
 
 @Component({
   selector: 'app-checkout',
@@ -31,31 +32,66 @@ export class CheckoutComponent implements OnInit {
 
     this.checkoutFormGroup = this.formBuilder.group({
       customer: this.formBuilder.group({
-        firstName: [''],
-        lastName: [''],
-        email: ['']
+        firstName: new FormControl('',
+          [Validators.required,
+            Validators.minLength(2),
+            Luv2ShopValidators.notOnlyWhiteSpace]),
+
+        lastName: new FormControl('',
+          [Validators.required,
+            Validators.minLength(2),
+            Luv2ShopValidators.notOnlyWhiteSpace]),
+
+        email: new FormControl('', [Validators.required, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,6}$')])
       }),
       shippingAddress: this.formBuilder.group({
-        street: [''],
-        city: [''],
-        postalCode: [''],
-        country: [''],
-        state: ['']
+        street: new FormControl('',
+          [Validators.required,
+            Validators.minLength(2),
+            Luv2ShopValidators.notOnlyWhiteSpace]),
+
+        city: new FormControl('',
+          [Validators.required,
+            Validators.minLength(2),
+            Luv2ShopValidators.notOnlyWhiteSpace]),
+
+        postalCode: new FormControl('',
+          [Validators.required,  Validators.minLength(5),
+            Luv2ShopValidators.notOnlyWhiteSpace]),
+
+        country: new FormControl('', [Validators.required]),
+        state: new FormControl('', [Validators.required]),
       }),
+
       billingAddress: this.formBuilder.group({
-        street: [''],
-        city: [''],
-        postalCode: [''],
-        country: [''],
-        state: ['']
+        street: new FormControl('',
+          [Validators.required,
+            Validators.minLength(2),
+            Luv2ShopValidators.notOnlyWhiteSpace]),
+
+        city: new FormControl('',
+          [Validators.required,
+            Validators.minLength(2),
+            Luv2ShopValidators.notOnlyWhiteSpace]),
+
+        postalCode: new FormControl('',
+          [Validators.required,  Validators.minLength(5),
+            Luv2ShopValidators.notOnlyWhiteSpace]),
+        country: new FormControl('', [Validators.required]),
+        state: new FormControl('', [Validators.required]),
       }),
+
       creditCard: this.formBuilder.group({
-        cardType: [''],
-        nameOnCard: [''],
-        cardNumber: [''],
-        securityNumber: [''],
-        expiryMonth: [''],
-        expiryYear: ['']
+        cardType: new FormControl('', [Validators.required]),
+        nameOnCard: new FormControl('',
+          [Validators.required,
+            Validators.minLength(2),
+            Luv2ShopValidators.notOnlyWhiteSpace]),
+
+        cardNumber: new FormControl('', [Validators.required, Validators.pattern('[0-9]{16}')]),
+        securityCode: new FormControl('', [Validators.required, Validators.pattern('[0-9]{3}')]),
+        expirationMonth: [''],
+        expirationYear: ['']
       })
     })
 
@@ -88,7 +124,68 @@ export class CheckoutComponent implements OnInit {
         this.countries = data
       }
     )
+  }
 
+  get firstName() {
+    return this.checkoutFormGroup.get('customer.firstName')
+  }
+
+  get lastName() {
+    return this.checkoutFormGroup.get('customer.lastName')
+  }
+
+  get email() {
+    return this.checkoutFormGroup.get('customer.email')
+  }
+
+
+  get shippingAddressStreet() {
+    return this.checkoutFormGroup.get('shippingAddress.street')
+  }
+
+  get shippingAddressCity() {
+    return this.checkoutFormGroup.get('shippingAddress.city')
+  }
+
+  get shippingAddressState() {
+    return this.checkoutFormGroup.get('shippingAddress.state')
+  }
+
+  get shippingAddressCountry() {
+    return this.checkoutFormGroup.get('shippingAddress.country')
+  }
+
+  get shippingAddressPostCode() {
+    return this.checkoutFormGroup.get('shippingAddress.postalCode')
+  }
+
+  get billingAddressStreet() {
+    return this.checkoutFormGroup.get('billingAddress.street')
+  }
+  get billingAddressCity() {
+    return this.checkoutFormGroup.get('billingAddress.city')
+  }
+  get billingAddressState() {
+    return this.checkoutFormGroup.get('billingAddress.state')
+  }
+  get billingAddressCountry() {
+    return this.checkoutFormGroup.get('billingAddress.country')
+  }
+  get billingAddressPostCode() {
+    return this.checkoutFormGroup.get('billingAddress.postalCode')
+  }
+
+  get creditCardType() {
+    return this.checkoutFormGroup.get('creditCard.cardType')
+  }
+  get creditCardNameOnCard() {
+    return this.checkoutFormGroup.get('creditCard.nameOnCard')
+  }
+  get creditCardNumber() {
+    return this.checkoutFormGroup.get('creditCard.cardNumber')
+  }
+  get creditCardSecurityCode() {
+    return this.checkoutFormGroup.get('creditCard.securityCode')
   }
 
   copyShippingAddressToBillingAddress(event) {
@@ -102,13 +199,17 @@ export class CheckoutComponent implements OnInit {
     } else {
       this.checkoutFormGroup.controls['billingAddress'].reset()
 
-        // bug fix for states
+      // bug fix for states
       this.shippingAddressStates = []
     }
   }
 
   onSubmit() {
     console.log("Handling the submit button")
+
+    if (this.checkoutFormGroup.invalid) {
+      this.checkoutFormGroup.markAllAsTouched()
+    }
     console.log(this.checkoutFormGroup.get('customer').value)
     console.log("The email address is: " + this.checkoutFormGroup.get('customer').value.email)
 
@@ -152,6 +253,7 @@ export class CheckoutComponent implements OnInit {
     const countryName = formGroup.value.country.name
 
     console.log(`${formGroupName} country code: ${countryCode}`)
+
     console.log(`${formGroupName} country name: ${countryName}`)
 
     this.luv2ShopFormService.getStates(countryCode).subscribe(
