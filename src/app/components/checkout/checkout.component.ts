@@ -28,8 +28,10 @@ export class CheckoutComponent implements OnInit {
 
   countries: Country[] = []
 
-  shippingAddressStates: State[] = []
-  billToAddressStates: State[] = []
+  shippingAddressStates: State[] = [];
+  billingAddressStates: State[] = [];
+
+  storage: Storage = sessionStorage;
 
   constructor(private formBuilder: FormBuilder,
               private luv2ShopFormService: Luv2ShopFormService,
@@ -40,8 +42,10 @@ export class CheckoutComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.reviewCartDetails()
+    this.reviewCartDetails();
 
+    // read the user's email address from browser storage
+    const theEmail = JSON.parse(this.storage.getItem('userEmail'));
     this.checkoutFormGroup = this.formBuilder.group({
       customer: this.formBuilder.group({
         firstName: new FormControl('',
@@ -54,7 +58,7 @@ export class CheckoutComponent implements OnInit {
             Validators.minLength(2),
             Luv2ShopValidators.notOnlyWhiteSpace]),
 
-        email: new FormControl('', [Validators.required, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,6}$')])
+        email: new FormControl(theEmail, [Validators.required, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,6}$')])
       }),
       shippingAddress: this.formBuilder.group({
         street: new FormControl('',
@@ -227,7 +231,7 @@ export class CheckoutComponent implements OnInit {
         .setValue(this.checkoutFormGroup.controls['shippingAddress'].value)
 
       // bug fix for states
-      this.billToAddressStates = this.shippingAddressStates
+      this.billingAddressStates = this.shippingAddressStates;
 
     } else {
       this.checkoutFormGroup.controls['billingAddress'].reset()
@@ -365,9 +369,10 @@ export class CheckoutComponent implements OnInit {
     this.luv2ShopFormService.getStates(countryCode).subscribe(
       data => {
         if (formGroupName === 'shippingAddress') {
-          this.shippingAddressStates = data
-        } else {
-          this.billToAddressStates = data
+          this.shippingAddressStates = data;
+        }
+        else {
+          this.billingAddressStates = data;
         }
 
         // select the first state as the default
